@@ -118,6 +118,7 @@
               <button class="btn" onclick="setView('chat')">Chat</button>
               <button class="btn" onclick="setView('decisions')">Decisões</button>
               <button class="btn" onclick="setView('projects')">Projetos (SPAC)</button>
+              <button class="btn" onclick="setView('erp')">ERP / SaaS</button>
               <button class="btn" onclick="setView('timeline')">Timeline</button>
             </div>
           </div>
@@ -216,6 +217,30 @@
             </div>
           </div>
 
+          <!-- ERP / SAAS -->
+          <div id="pane-erp" class="card p-4 hidden">
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div class="text-lg font-semibold">ERP Operacional — Food Service</div>
+                  <p class="text-xs opacity-70">Cadastro • Fichas Técnicas • Precificação • Simulações • DRE</p>
+                </div>
+                <div class="pill text-[11px]" id="erpTimestamp">Atualizado em tempo real</div>
+              </div>
+              <div id="erpSummary" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"></div>
+              <div class="flex flex-col lg:flex-row gap-4">
+                <aside class="lg:w-72">
+                  <div class="text-xs uppercase tracking-wide opacity-60 mb-2">Módulos</div>
+                  <div id="erpNav" class="space-y-2"></div>
+                </aside>
+                <section class="flex-1">
+                  <div id="erpSectionNav" class="flex flex-wrap gap-2"></div>
+                  <div id="erpContent" class="mt-4 space-y-4"></div>
+                </section>
+              </div>
+            </div>
+          </div>
+
           <!-- TIMELINE -->
           <div id="pane-timeline" class="card p-4 hidden">
             <div class="flex items-center justify-between">
@@ -281,13 +306,1036 @@
       }
     };
 
+    /************* ERP DATA *************/
+    const erpData = {
+      products: {
+        direct: [
+          { codigo:'VD-001', descricao:'Cerveja IPA 600 ml', fornecedor:'Brassaria Sul', qtdPorEmbalagem:12, unidadeMedida:'garrafa', precoPorUnidade:14.5, precoPorMedida:174.0, medida:'Caixa 12 un' },
+          { codigo:'VD-002', descricao:'Refrigerante Artesanal 355 ml', fornecedor:'Soda da Serra', qtdPorEmbalagem:24, unidadeMedida:'lata', precoPorUnidade:6.9, precoPorMedida:165.6, medida:'Fardo 24 latas' },
+          { codigo:'VD-003', descricao:'Café em Grãos Especial 1 kg', fornecedor:'Torrefação do Vale', qtdPorEmbalagem:10, unidadeMedida:'kg', precoPorUnidade:32.0, precoPorMedida:320.0, medida:'Fardo 10 kg' }
+        ],
+        processed: [
+          { codigo:'PR-001', materiaPrima:'Blend Hambúrguer 160 g', pesoBrutoPorUnidade:0.18, pesoLiquidoPorUnidade:0.16, unidadeMedida:'kg', precoPorUnidade:42.0, fatorCorrecao:0.12, precoPorMedida:48.0 },
+          { codigo:'PR-002', materiaPrima:'Massa de Pizza Napolitana', pesoBrutoPorUnidade:0.28, pesoLiquidoPorUnidade:0.25, unidadeMedida:'kg', precoPorUnidade:18.0, fatorCorrecao:0.08, precoPorMedida:19.6 },
+          { codigo:'PR-003', materiaPrima:'Molho de Tomate da Casa', pesoBrutoPorUnidade:0.52, pesoLiquidoPorUnidade:0.50, unidadeMedida:'kg', precoPorUnidade:14.0, fatorCorrecao:0.05, precoPorMedida:14.7 }
+        ]
+      },
+      fichaTecnica: [
+        {
+          codProduto:'PR-001',
+          nome:'Hambúrguer Artesanal 160 g',
+          tipo:'Processado',
+          materiaPrima:'Blend bovino',
+          unidade:'porção',
+          quantidade:1,
+          valorIndividualItem:10.54,
+          quantidadeProdutosProduzidos:30,
+          custoInsumos:316.2,
+          itens:[
+            { materiaPrima:'Blend bovino resfriado', unidade:'kg', quantidade:0.16, valor:6.72 },
+            { materiaPrima:'Pão brioche 90 g', unidade:'un', quantidade:1, valor:1.85 },
+            { materiaPrima:'Queijo prato fatiado', unidade:'g', quantidade:0.03, valor:1.41 },
+            { materiaPrima:'Molho da casa', unidade:'g', quantidade:0.02, valor:0.56 }
+          ],
+          materiasPrimas:[
+            { materiaPrima:'Blend bovino resfriado', unidade:'kg', quantidade:4.8, fatorConversao:0.85 },
+            { materiaPrima:'Pão brioche 90 g', unidade:'un', quantidade:30, fatorConversao:1.0 },
+            { materiaPrima:'Queijo prato fatiado', unidade:'kg', quantidade:0.9, fatorConversao:0.92 },
+            { materiaPrima:'Molho da casa', unidade:'kg', quantidade:0.6, fatorConversao:0.95 }
+          ],
+          custosVariaveisTotais:342.6
+        },
+        {
+          codProduto:'PR-002',
+          nome:'Pizza Napolitana 30 cm',
+          tipo:'Processado',
+          materiaPrima:'Massa napolitana',
+          unidade:'unidade',
+          quantidade:1,
+          valorIndividualItem:18.02,
+          quantidadeProdutosProduzidos:18,
+          custoInsumos:320.4,
+          itens:[
+            { materiaPrima:'Massa napolitana', unidade:'kg', quantidade:0.25, valor:4.50 },
+            { materiaPrima:'Molho de tomate da casa', unidade:'g', quantidade:0.12, valor:1.76 },
+            { materiaPrima:'Muçarela fresca', unidade:'g', quantidade:0.09, valor:3.42 },
+            { materiaPrima:'Manjericão fresco', unidade:'g', quantidade:0.01, valor:0.32 }
+          ],
+          materiasPrimas:[
+            { materiaPrima:'Farinha tipo 00', unidade:'kg', quantidade:5.0, fatorConversao:0.88 },
+            { materiaPrima:'Fermento natural', unidade:'kg', quantidade:0.6, fatorConversao:0.95 },
+            { materiaPrima:'Molho de tomate da casa', unidade:'kg', quantidade:2.2, fatorConversao:0.96 },
+            { materiaPrima:'Muçarela fresca', unidade:'kg', quantidade:1.6, fatorConversao:0.9 }
+          ],
+          custosVariaveisTotais:356.8
+        },
+        {
+          codProduto:'PR-003',
+          nome:'Molho de Tomate da Casa 1 L',
+          tipo:'Processado',
+          materiaPrima:'Tomate italiano',
+          unidade:'litro',
+          quantidade:1,
+          valorIndividualItem:7.2,
+          quantidadeProdutosProduzidos:40,
+          custoInsumos:216.0,
+          itens:[
+            { materiaPrima:'Tomate italiano', unidade:'kg', quantidade:1.6, valor:5.12 },
+            { materiaPrima:'Cebola', unidade:'kg', quantidade:0.2, valor:0.68 },
+            { materiaPrima:'Ervas frescas', unidade:'g', quantidade:0.02, valor:0.92 },
+            { materiaPrima:'Azeite extra virgem', unidade:'ml', quantidade:0.04, valor:0.48 }
+          ],
+          materiasPrimas:[
+            { materiaPrima:'Tomate italiano', unidade:'kg', quantidade:64, fatorConversao:0.78 },
+            { materiaPrima:'Cebola', unidade:'kg', quantidade:8, fatorConversao:0.9 },
+            { materiaPrima:'Azeite extra virgem', unidade:'L', quantidade:3, fatorConversao:0.98 },
+            { materiaPrima:'Manjericão fresco', unidade:'kg', quantidade:1.2, fatorConversao:0.85 }
+          ],
+          custosVariaveisTotais:248.4
+        }
+      ],
+      pricing: {
+        direct: [
+          { cod:'VD-001', produto:'Cerveja IPA 600 ml', precoVendaAtual:24.9, cmv:11.5, frete:1.1, custoVariavel:2.4, impostosPercent:7.5, impostosValor:1.87, taxaMaquinaPercent:2.2, taxaMaquinaValor:0.55, taxaAppPercent:10.0, taxaAppValor:2.49, comissaoPercent:4.0, comissaoValor:1.0, margemContribuicaoValor:2.79, margemContribuicaoPercent:11.2, cmvValor:11.5, cmvPercent:46.2, custosVariaveisValor:9.41, custosVariaveisPercent:37.8, despesasVariaveisValor:1.2, despesasVariaveisPercent:4.8 },
+          { cod:'VD-002', produto:'Refrigerante Artesanal 355 ml', precoVendaAtual:18.5, cmv:7.4, frete:0.9, custoVariavel:1.6, impostosPercent:6.5, impostosValor:1.2, taxaMaquinaPercent:2.2, taxaMaquinaValor:0.41, taxaAppPercent:8.0, taxaAppValor:1.48, comissaoPercent:3.0, comissaoValor:0.56, margemContribuicaoValor:4.05, margemContribuicaoPercent:21.9, cmvValor:7.4, cmvPercent:40.0, custosVariaveisValor:6.15, custosVariaveisPercent:33.2, despesasVariaveisValor:0.9, despesasVariaveisPercent:4.9 },
+          { cod:'VD-003', produto:'Café em Grãos Especial 1 kg', precoVendaAtual:42.0, cmv:18.9, frete:2.4, custoVariavel:3.1, impostosPercent:6.0, impostosValor:2.52, taxaMaquinaPercent:2.2, taxaMaquinaValor:0.92, taxaAppPercent:0.0, taxaAppValor:0.0, comissaoPercent:0.0, comissaoValor:0.0, margemContribuicaoValor:12.56, margemContribuicaoPercent:29.9, cmvValor:18.9, cmvPercent:45.0, custosVariaveisValor:8.94, custosVariaveisPercent:21.3, despesasVariaveisValor:1.6, despesasVariaveisPercent:3.8 }
+        ],
+        processed: [
+          { cod:'PR-001', produto:'Hambúrguer Artesanal 160 g', precoVendaAtual:34.0, cmv:13.8, custoMaoObraDireta:4.2, frete:0.6, custoVariavel:1.9, impostosPercent:5.9, impostosValor:2.01, taxaMaquinaPercent:2.2, taxaMaquinaValor:0.75, taxaAppPercent:7.0, taxaAppValor:1.88, comissaoPercent:1.5, comissaoValor:0.51, margemContribuicaoValor:7.36, margemContribuicaoPercent:21.6, cpvValor:13.8, cpvPercent:40.6, custoMaoObraDiretaValor:4.2, custoMaoObraDiretaPercent:12.4, custosVariaveisValor:7.65, custosVariaveisPercent:22.5, despesasVariaveisValor:0.99, despesasVariaveisPercent:2.9 },
+          { cod:'PR-002', produto:'Pizza Napolitana 30 cm', precoVendaAtual:49.0, cmv:19.6, custoMaoObraDireta:5.5, frete:0.9, custoVariavel:2.8, impostosPercent:6.2, impostosValor:3.04, taxaMaquinaPercent:2.2, taxaMaquinaValor:1.08, taxaAppPercent:10.0, taxaAppValor:4.9, comissaoPercent:2.5, comissaoValor:1.23, margemContribuicaoValor:8.35, margemContribuicaoPercent:17.0, cpvValor:19.6, cpvPercent:40.0, custoMaoObraDiretaValor:5.5, custoMaoObraDiretaPercent:11.2, custosVariaveisValor:13.95, custosVariaveisPercent:28.5, despesasVariaveisValor:1.6, despesasVariaveisPercent:3.3 },
+          { cod:'PR-003', produto:'Molho de Tomate da Casa 1 L', precoVendaAtual:19.5, cmv:7.2, custoMaoObraDireta:2.1, frete:0.4, custoVariavel:1.2, impostosPercent:5.0, impostosValor:0.98, taxaMaquinaPercent:1.8, taxaMaquinaValor:0.35, taxaAppPercent:0.0, taxaAppValor:0.0, comissaoPercent:0.0, comissaoValor:0.0, margemContribuicaoValor:6.67, margemContribuicaoPercent:34.2, cpvValor:7.2, cpvPercent:36.9, custoMaoObraDiretaValor:2.1, custoMaoObraDiretaPercent:10.8, custosVariaveisValor:2.93, custosVariaveisPercent:15.0, despesasVariaveisValor:0.6, despesasVariaveisPercent:3.1 }
+        ]
+      },
+      simulations: {
+        direct: [
+          { codigo:'VD-001', produto:'Cerveja IPA 600 ml', precoVenda:24.9, previsaoVendas:850, faturamentoPrevisto:21165.0, custosVariaveis:8010.0, impostos:1659.0, taxaMaquina:468.0, taxaAplicativo:2116.0, comissaoVendas:846.0, margemContribuicaoValor:5966.0, margemContribuicaoPercent:28.2, rateioDespesasFixas:4820.0, margemLucroValor:1146.0, margemLucroPercent:5.4, markupMultiplicador:1.98, mixPercent:32.0 },
+          { codigo:'VD-002', produto:'Refrigerante Artesanal 355 ml', precoVenda:18.5, previsaoVendas:620, faturamentoPrevisto:11470.0, custosVariaveis:4060.0, impostos:745.0, taxaMaquina:252.0, taxaAplicativo:918.0, comissaoVendas:342.0, margemContribuicaoValor:3153.0, margemContribuicaoPercent:27.5, rateioDespesasFixas:2380.0, margemLucroValor:773.0, margemLucroPercent:6.7, markupMultiplicador:2.08, mixPercent:18.0 },
+          { codigo:'VD-004', produto:'Kit Degustação de Cafés', precoVenda:68.0, previsaoVendas:180, faturamentoPrevisto:12240.0, custosVariaveis:3560.0, impostos:978.0, taxaMaquina:164.0, taxaAplicativo:0.0, comissaoVendas:612.0, margemContribuicaoValor:4938.0, margemContribuicaoPercent:40.3, rateioDespesasFixas:1880.0, margemLucroValor:3058.0, margemLucroPercent:25.0, markupMultiplicador:2.35, mixPercent:10.0 }
+        ],
+        processed: [
+          { codigo:'PR-001', produto:'Hambúrguer Artesanal 160 g', precoVenda:34.0, previsaoVendas:540, faturamentoPrevisto:18360.0, custosVariaveis:11520.0, impostos:1116.0, taxaMaquina:405.0, taxaAplicativo:1295.0, comissaoVendas:275.0, margemContribuicaoValor:3749.0, margemContribuicaoPercent:20.4, rateioDespesasFixas:3210.0, margemLucroValor:539.0, margemLucroPercent:2.9, markupMultiplicador:1.78, mixPercent:22.0 },
+          { codigo:'PR-002', produto:'Pizza Napolitana 30 cm', precoVenda:49.0, previsaoVendas:420, faturamentoPrevisto:20580.0, custosVariaveis:12620.0, impostos:1276.0, taxaMaquina:540.0, taxaAplicativo:2058.0, comissaoVendas:515.0, margemContribuicaoValor:3571.0, margemContribuicaoPercent:17.4, rateioDespesasFixas:2960.0, margemLucroValor:611.0, margemLucroPercent:3.0, markupMultiplicador:1.71, mixPercent:16.0 },
+          { codigo:'PR-004', produto:'Linha de Pratos Congelados', precoVenda:28.0, previsaoVendas:760, faturamentoPrevisto:21280.0, custosVariaveis:12860.0, impostos:1064.0, taxaMaquina:332.0, taxaAplicativo:1489.0, comissaoVendas:426.0, margemContribuicaoValor:4509.0, margemContribuicaoPercent:21.2, rateioDespesasFixas:3180.0, margemLucroValor:1329.0, margemLucroPercent:6.2, markupMultiplicador:1.82, mixPercent:17.0 }
+        ]
+      },
+      analysis: {
+        direct: [
+          { codigo:'VD-001', produto:'Cerveja IPA 600 ml', precoVenda:24.9, custosVariaveis:9.41, custoProduto:11.5, frete:1.1, despesasVariaveis:1.2, impostos:1.87, taxaMaquina:0.55, taxaAplicativo:2.49, comissao:1.0, margemContribuicao:2.79, rateioDespesasFixas:1.95, margemLucro:0.84, markup:2.16, lucroDesejadoPercent:12.0, precoSugerido:26.8 },
+          { codigo:'VD-002', produto:'Refrigerante Artesanal 355 ml', precoVenda:18.5, custosVariaveis:6.15, custoProduto:7.4, frete:0.9, despesasVariaveis:0.9, impostos:1.2, taxaMaquina:0.41, taxaAplicativo:1.48, comissao:0.56, margemContribuicao:4.05, rateioDespesasFixas:1.48, margemLucro:2.57, markup:2.50, lucroDesejadoPercent:18.0, precoSugerido:19.9 },
+          { codigo:'VD-003', produto:'Café em Grãos Especial 1 kg', precoVenda:42.0, custosVariaveis:8.94, custoProduto:18.9, frete:2.4, despesasVariaveis:1.6, impostos:2.52, taxaMaquina:0.92, taxaAplicativo:0.0, comissao:0.0, margemContribuicao:12.56, rateioDespesasFixas:3.4, margemLucro:9.16, markup:2.85, lucroDesejadoPercent:22.0, precoSugerido:44.5 }
+        ],
+        processed: [
+          { codigo:'PR-001', produto:'Hambúrguer Artesanal 160 g', precoVenda:34.0, custosVariaveis:7.65, custoProduto:13.8, frete:0.6, despesasVariaveis:0.99, impostos:2.01, taxaMaquina:0.75, taxaAplicativo:1.88, comissao:0.51, margemContribuicao:7.36, rateioDespesasFixas:2.95, margemLucro:4.41, markup:2.30, lucroDesejadoPercent:20.0, precoSugerido:36.5 },
+          { codigo:'PR-002', produto:'Pizza Napolitana 30 cm', precoVenda:49.0, custosVariaveis:13.95, custoProduto:19.6, frete:0.9, despesasVariaveis:1.6, impostos:3.04, taxaMaquina:1.08, taxaAplicativo:4.9, comissao:1.23, margemContribuicao:8.35, rateioDespesasFixas:3.6, margemLucro:4.75, markup:2.02, lucroDesejadoPercent:22.0, precoSugerido:52.4 },
+          { codigo:'PR-003', produto:'Molho de Tomate da Casa 1 L', precoVenda:19.5, custosVariaveis:2.93, custoProduto:7.2, frete:0.4, despesasVariaveis:0.6, impostos:0.98, taxaMaquina:0.35, taxaAplicativo:0.0, comissao:0.0, margemContribuicao:6.67, rateioDespesasFixas:2.1, margemLucro:4.57, markup:2.71, lucroDesejadoPercent:18.0, precoSugerido:20.7 }
+        ]
+      },
+      fixedExpenses: {
+        total:82450.0,
+        items:[
+          { categoria:'Salários + Encargos + Benefícios', valor:38500.0 },
+          { categoria:'Energia Elétrica', valor:8200.0 },
+          { categoria:'Aluguel + IPTU', valor:14500.0 },
+          { categoria:'Alarme + Segurança', valor:1850.0 },
+          { categoria:'Internet + Telefone', valor:980.0 },
+          { categoria:'Água', valor:1340.0 },
+          { categoria:'Pró-Labore', valor:9000.0 },
+          { categoria:'Contabilidade', valor:1850.0 },
+          { categoria:'Suporte de TI', valor:1250.0 },
+          { categoria:'Sistemas de Gestão', valor:1620.0 },
+          { categoria:'Publicidade e Marketing', valor:2870.0 },
+          { categoria:'Combustível', valor:2140.0 },
+          { categoria:'Manutenção Predial', valor:1780.0 },
+          { categoria:'Manutenção de Carros', valor:1560.0 },
+          { categoria:'Material de Escritório', valor:720.0 },
+          { categoria:'Gás', valor:2380.0 },
+          { categoria:'Cooperados', valor:4100.0 },
+          { categoria:'Outras Despesas Fixas', valor:2650.0 }
+        ]
+      },
+      payroll: {
+        encargosTrabalhistas:[
+          { item:'Provisão Férias + 30%', percentual:13.3 },
+          { item:'Provisão 13º Salário', percentual:8.3 },
+          { item:'Previsão 13º sobre Férias', percentual:2.8 },
+          { item:'Total Encargos Trabalhistas(%)', percentual:24.4 }
+        ],
+        encargosSociais:[
+          { item:'INSS', percentual:20.0 },
+          { item:'SAT/RAT', percentual:3.0 },
+          { item:'Salário Educação', percentual:2.5 },
+          { item:'INCRA/SEST/SEBRAE/SENAT', percentual:1.8 },
+          { item:'FGTS', percentual:8.0 },
+          { item:'FGTS + Provisão de Rescisão Contratual', percentual:4.0 },
+          { item:'Total Encargos Sociais(%)', percentual:39.3 }
+        ],
+        colaboradores:[
+          { codigo:'COL-001', nome:'Ana Paula Santos', salario:4200.0, setor:'Cozinha', cargo:'Chefe de Cozinha', contratacao:'CLT', encargosSociais:39.3, encargosTrabalhistas:24.4, valeTransporte:220.0, valeRefeicao:480.0, convenioMedico:350.0, total:7430.0, cargaHorariaMensal:220, valorHora:33.77 },
+          { codigo:'COL-002', nome:'Bruno Almeida', salario:2800.0, setor:'Bar', cargo:'Barman Líder', contratacao:'CLT', encargosSociais:37.5, encargosTrabalhistas:22.0, valeTransporte:210.0, valeRefeicao:420.0, convenioMedico:280.0, total:4970.0, cargaHorariaMensal:200, valorHora:24.85 },
+          { codigo:'COL-003', nome:'Camila Ribeiro', salario:1980.0, setor:'Atendimento', cargo:'Supervisora de Salão', contratacao:'CLT', encargosSociais:35.0, encargosTrabalhistas:21.0, valeTransporte:195.0, valeRefeicao:380.0, convenioMedico:260.0, total:3595.0, cargaHorariaMensal:200, valorHora:17.98 },
+          { codigo:'COL-004', nome:'Equipe de Produção', salario:12400.0, setor:'Produção', cargo:'Cooperados', contratacao:'Cooperado', encargosSociais:18.0, encargosTrabalhistas:12.0, valeTransporte:0.0, valeRefeicao:0.0, convenioMedico:0.0, total:15488.0, cargaHorariaMensal:520, valorHora:29.78 }
+        ]
+      },
+      dre: {
+        receitas:[
+          { categoria:'Bares e Restaurante', valor:286500.0 },
+          { categoria:'Bares e Restaurante - Convites Sociais', valor:48500.0 },
+          { categoria:'Deduções da Receita - Impostos e Contribuições', valor:-32850.0 },
+          { categoria:'(-) ICMS', valor:-19850.0 },
+          { categoria:'(-) COFINS', valor:-9600.0 },
+          { categoria:'Receitas Líquidas', valor:281550.0 }
+        ],
+        custos:[
+          { categoria:'Custos dos Produtos Vendidos', valor:164320.0 },
+          { categoria:'Alimentos', valor:112450.0 },
+          { categoria:'Bebidas', valor:32870.0 },
+          { categoria:'Reversão de custo - alimentação funcionários', valor:-3150.0 },
+          { categoria:'Custos Outros Estoques', valor:14250.0 },
+          { categoria:'PERDAS ESTOQUE', valor:3900.0 }
+        ],
+        maoObra:[
+          { categoria:'Folha de Pagto.+ Encargos + Benefícios', valor:74280.0 },
+          { categoria:'Serviços de 3ºs - Cooperados ou Temporários', valor:8650.0 },
+          { categoria:'Mão de Obra - Temporário', valor:5240.0 },
+          { categoria:'Gorjetas', valor:6130.0 },
+          { categoria:'Serviços de Terceiros - músicos - animadores - recepção e outros', valor:4870.0 },
+          { categoria:'Essa planilha Folha + Gorjetas', valor:90230.0 },
+          { categoria:'Dados fornecidos pelo RH. FOLHA + Gorjetas', valor:89500.0 },
+          { categoria:'Diferença', valor:730.0 }
+        ],
+        estrutura:[
+          { categoria:'Materiais/Utensílios/ Equipamentos de cozinha', valor:5860.0 },
+          { categoria:'Serviços de Manutenção', valor:4380.0 },
+          { categoria:'Materiais de manutenção, limpeza e conservação', valor:2680.0 },
+          { categoria:'Materiais informativos e de divulgação', valor:1840.0 },
+          { categoria:'Energia Elétrica', valor:8200.0 },
+          { categoria:'Água', valor:1340.0 },
+          { categoria:'Gás', valor:2380.0 },
+          { categoria:'Lavanderia', valor:1680.0 },
+          { categoria:'Locação de equipamentos', valor:2140.0 }
+        ],
+        apoioAdm:[
+          { categoria:'Serviços de 3ºs - consultorias e Marketing', valor:2870.0 },
+          { categoria:'Transportes', valor:2140.0 },
+          { categoria:'Comunicação', valor:980.0 },
+          { categoria:'Taxas e contribuições - Associações de classe', valor:620.0 },
+          { categoria:'Eventos, Cursos e Formações', valor:1480.0 },
+          { categoria:'Software controle- Servs. e manutenções', valor:1620.0 },
+          { categoria:'Viagens, Estadias e Hospedagens', valor:1980.0 }
+        ],
+        resultadoOperacao:68250.0
+      },
+      dreEntries: {
+        receitas:[
+          { tipo:'Receita com cartão de crédito', valor:186420.0 },
+          { tipo:'Receita com cartão de débito', valor:62480.0 },
+          { tipo:'Receita com cartão alimentação', valor:18240.0 },
+          { tipo:'Receita com cartão refeição', valor:14810.0 }
+        ],
+        despesas:[
+          { grupo:'Custos dos Produtos Vendidos', itens:[
+            { categoria:'Alimentos', valor:112450.0 },
+            { categoria:'Bebidas', valor:32870.0 },
+            { categoria:'Reversão de custo - alimentação funcionários', valor:-3150.0 },
+            { categoria:'Custos Outros Estoques', valor:14250.0 },
+            { categoria:'PERDAS ESTOQUE', valor:3900.0 }
+          ]},
+          { grupo:'Mão de Obra', itens:[
+            { categoria:'Folha de Pagto.+ Encargos + Benefícios', valor:74280.0 },
+            { categoria:'Serviços de 3ºs - Cooperados ou Temporários', valor:8650.0 },
+            { categoria:'Mão de Obra - Temporário', valor:5240.0 },
+            { categoria:'Gorjetas', valor:6130.0 },
+            { categoria:'Serviços de Terceiros - músicos - animadores - recepção e outros', valor:4870.0 },
+            { categoria:'Essa planilha Folha + Gorjetas', valor:90230.0 },
+            { categoria:'Dados fornecidos pelo RH. FOLHA + Gorjetas', valor:89500.0 },
+            { categoria:'Diferença', valor:730.0 }
+          ]},
+          { grupo:'Estrutura', itens:[
+            { categoria:'Materiais/Utensílios/ Equipamentos de cozinha', valor:5860.0 },
+            { categoria:'Serviços de Manutenção', valor:4380.0 },
+            { categoria:'Materiais de manutenção, limpeza e conservação', valor:2680.0 },
+            { categoria:'Materiais informativos e de divulgação', valor:1840.0 },
+            { categoria:'Energia Elétrica', valor:8200.0 },
+            { categoria:'Água', valor:1340.0 },
+            { categoria:'Gás', valor:2380.0 },
+            { categoria:'Lavanderia', valor:1680.0 },
+            { categoria:'Locação de equipamentos', valor:2140.0 }
+          ]},
+          { grupo:'Apoio e Adm.', itens:[
+            { categoria:'Serviços de 3ºs - consultorias e Marketing', valor:2870.0 },
+            { categoria:'Transportes', valor:2140.0 },
+            { categoria:'Comunicação', valor:980.0 },
+            { categoria:'Taxas e contribuições - Associações de classe', valor:620.0 },
+            { categoria:'Eventos, Cursos e Formações', valor:1480.0 },
+            { categoria:'Software controle- Servs. e manutenções', valor:1620.0 },
+            { categoria:'Resultado da Operação', valor:68250.0 }
+          ]}
+        ],
+        relatorio:{ periodo:'Agosto/2025', receitaLiquida:281550.0, lucroOperacional:68250.0, margemOperacional:24.2, comentario:'Resultado impulsionado por mix de processados com maior margem e controle de perdas.' }
+      },
+      dashboard: {
+        indicators:[
+          { label:'Faturamento Previsto (mês)', value:'R$ 420.350', trend:'+6,2% vs. mês anterior', description:'Projeção combinada das simulações de revenda e processados.' },
+          { label:'Margem de Contribuição Média', value:'28,4%', trend:'+1,1 p.p.', description:'Considera CMV, impostos e variáveis dos dois portfólios.' },
+          { label:'Ponto de Equilíbrio', value:'R$ 312.800', trend:'-3,4% após ajustes de custos', description:'Baseado nas despesas fixas atualizadas e margem de contribuição.' },
+          { label:'Headcount Equivalente', value:'27 colaboradores', trend:'2 vagas abertas', description:'Inclui equipe CLT, temporários e cooperados.' }
+        ],
+        mix:[
+          { categoria:'Venda direta', mixPercent:50.0, margemContribuicao:24.3, faturamento:210000.0 },
+          { categoria:'Produtos processados', mixPercent:40.0, margemContribuicao:32.8, faturamento:168000.0 },
+          { categoria:'Eventos e catering', mixPercent:10.0, margemContribuicao:29.0, faturamento:42350.0 }
+        ],
+        pipeline:[
+          { projeto:'Central de Produção', status:'Execução', impacto:'-4,5% no CMV projetado', deadline:'nov/2025' },
+          { projeto:'Nova carta de drinks', status:'Planejamento', impacto:'+8% no ticket médio', deadline:'dez/2025' },
+          { projeto:'Integração iFood / PDV', status:'Homologação', impacto:'Redução de 30 min no lead time', deadline:'out/2025' }
+        ]
+      },
+      dataEntry: {
+        vendas:[
+          { data:'2025-08-01', canal:'Salão', produto:'Almoço executivo', quantidade:86, precoUnitario:39.0, receita:3354.0 },
+          { data:'2025-08-01', canal:'Delivery', produto:'Hambúrguer artesanal', quantidade:64, precoUnitario:34.0, receita:2176.0 },
+          { data:'2025-08-02', canal:'Salão', produto:'Rodízio de petiscos', quantidade:42, precoUnitario:72.0, receita:3024.0 },
+          { data:'2025-08-02', canal:'Eventos', produto:'Coquetel corporativo', quantidade:1, precoUnitario:8600.0, receita:8600.0 },
+          { data:'2025-08-03', canal:'Delivery', produto:'Pizza napolitana', quantidade:78, precoUnitario:49.0, receita:3822.0 }
+        ],
+        despesas:[
+          { data:'2025-08-01', categoria:'Fornecedores', descricao:'Compra semanal de hortifruti', valor:2980.0, centroCusto:'Cozinha' },
+          { data:'2025-08-01', categoria:'Logística', descricao:'Frete refrigerado para carnes', valor:620.0, centroCusto:'Compras' },
+          { data:'2025-08-02', categoria:'Marketing', descricao:'Campanha iFood destaque', valor:840.0, centroCusto:'Comercial' },
+          { data:'2025-08-02', categoria:'Folha de pagamento', descricao:'Cooperados produção', valor:4100.0, centroCusto:'Produção' },
+          { data:'2025-08-03', categoria:'Manutenção', descricao:'Revisão câmaras frias', valor:1280.0, centroCusto:'Infraestrutura' }
+        ]
+      }
+    };
+
+    const erpModules = [
+      {
+        id:'cadastro-produtos',
+        label:'1. Cadastro de Produtos',
+        description:'Domine o mix de compras para revenda e itens processados com visão unificada de custos base.',
+        sections:[
+          {
+            id:'venda-direta',
+            label:'1.1 Venda Direta',
+            type:'table',
+            description:'Produtos adquiridos para revenda imediata com controle de custo por embalagem e medida.',
+            columns:[
+              { key:'codigo', label:'Código' },
+              { key:'descricao', label:'Descrição de Produtos para Revenda' },
+              { key:'fornecedor', label:'Fornecedor' },
+              { key:'qtdPorEmbalagem', label:'Qtd por Embalagem', format:'number' },
+              { key:'unidadeMedida', label:'Unidade de Medida' },
+              { key:'precoPorUnidade', label:'Preço por Un. de Medida', format:'currency' },
+              { key:'precoPorMedida', label:'Preço por Medida', format:'currency' },
+              { key:'medida', label:'Medida' }
+            ],
+            data: () => erpData.products.direct
+          },
+          {
+            id:'processados',
+            label:'1.2 Processados',
+            type:'table',
+            description:'Base de matérias-primas com perdas controladas para produção própria.',
+            columns:[
+              { key:'codigo', label:'Código' },
+              { key:'materiaPrima', label:'Matéria Prima' },
+              { key:'pesoBrutoPorUnidade', label:'Peso Bruto por Un. Medida (kg)', format:'number' },
+              { key:'pesoLiquidoPorUnidade', label:'Peso Líquido por Un. Medida (kg)', format:'number' },
+              { key:'unidadeMedida', label:'Unidade de Medida' },
+              { key:'precoPorUnidade', label:'Preço por Un. Medida', format:'currency' },
+              { key:'fatorCorrecao', label:'Fator de Correção/Perda', format:'percent' },
+              { key:'precoPorMedida', label:'Preço por Medida', format:'currency' }
+            ],
+            data: () => erpData.products.processed
+          }
+        ]
+      },
+      {
+        id:'ficha-tecnica',
+        label:'2. Ficha Técnica',
+        description:'Transforme insumos em padrão operacional com rendimento, custos e perdas mapeadas.',
+        sections:[
+          { id:'fichas', label:'Fichas Técnicas', type:'fichas', data: () => erpData.fichaTecnica }
+        ]
+      },
+      {
+        id:'precificacao',
+        label:'3. Precificação Inteligente',
+        description:'Compare CMV, taxas e margens para ajustar preços com segurança.',
+        sections:[
+          {
+            id:'precificacao-venda-direta',
+            label:'3.1 Venda Direta',
+            type:'table',
+            columns:[
+              { key:'cod', label:'Cód' },
+              { key:'produto', label:'Produto/Serviço' },
+              { key:'precoVendaAtual', label:'Preço de Venda Atual - R$', format:'currency' },
+              { key:'cmv', label:'Custo da Mercadoria Vendida (CMV)', format:'currency' },
+              { key:'frete', label:'Frete', format:'currency' },
+              { key:'custoVariavel', label:'Custo Variável', format:'currency' },
+              { key:'impostosPercent', label:'Impostos sobre Vendas - %', format:'percent' },
+              { key:'impostosValor', label:'Impostos sobre Vendas - R$', format:'currency' },
+              { key:'taxaMaquinaPercent', label:'Taxa da Máquina de Cartão - %', format:'percent' },
+              { key:'taxaMaquinaValor', label:'Taxa da Máquina de Cartão - R$', format:'currency' },
+              { key:'taxaAppPercent', label:'Taxa Aplicativo - %', format:'percent' },
+              { key:'taxaAppValor', label:'Taxa Aplicativo - R$', format:'currency' },
+              { key:'comissaoPercent', label:'Comissão sobre Vendas - %', format:'percent' },
+              { key:'comissaoValor', label:'Comissão sobre Vendas - R$', format:'currency' },
+              { key:'margemContribuicaoValor', label:'Margem de Contribuição Atual - R$', format:'currency' },
+              { key:'margemContribuicaoPercent', label:'Margem de Contribuição Atual - %', format:'percent' },
+              { key:'cmvValor', label:'CMV - R$', format:'currency' },
+              { key:'cmvPercent', label:'CMV - %', format:'percent' },
+              { key:'custosVariaveisValor', label:'Custos Variáveis - R$', format:'currency' },
+              { key:'custosVariaveisPercent', label:'Custos Variáveis - %', format:'percent' },
+              { key:'despesasVariaveisValor', label:'Despesas Variáveis - R$', format:'currency' },
+              { key:'despesasVariaveisPercent', label:'Despesas Variáveis - %', format:'percent' }
+            ],
+            data: () => erpData.pricing.direct
+          },
+          {
+            id:'precificacao-processados',
+            label:'3.2 Processados',
+            type:'table',
+            columns:[
+              { key:'cod', label:'Cód' },
+              { key:'produto', label:'Produto/Serviço' },
+              { key:'precoVendaAtual', label:'Preço de Venda Atual - R$', format:'currency' },
+              { key:'cmv', label:'Custo da Mercadoria Vendida (CMV)', format:'currency' },
+              { key:'custoMaoObraDireta', label:'Custo Mão de Obra Direta', format:'currency' },
+              { key:'frete', label:'Frete', format:'currency' },
+              { key:'custoVariavel', label:'Custo Variável', format:'currency' },
+              { key:'impostosPercent', label:'Impostos sobre Vendas - %', format:'percent' },
+              { key:'impostosValor', label:'Impostos sobre Vendas - R$', format:'currency' },
+              { key:'taxaMaquinaPercent', label:'Taxa da Máquina de Cartão - %', format:'percent' },
+              { key:'taxaMaquinaValor', label:'Taxa da Máquina de Cartão - R$', format:'currency' },
+              { key:'taxaAppPercent', label:'Taxa Aplicativo - %', format:'percent' },
+              { key:'taxaAppValor', label:'Taxa Aplicativo - R$', format:'currency' },
+              { key:'comissaoPercent', label:'Comissão sobre Vendas - %', format:'percent' },
+              { key:'comissaoValor', label:'Comissão sobre Vendas - R$', format:'currency' },
+              { key:'margemContribuicaoValor', label:'Margem de Contribuição Atual - R$', format:'currency' },
+              { key:'margemContribuicaoPercent', label:'Margem de Contribuição Atual - %', format:'percent' },
+              { key:'cpvValor', label:'Custo da Mercadoria Vendida (CPV/CSV) - R$', format:'currency' },
+              { key:'cpvPercent', label:'Custo da Mercadoria Vendida (CPV/CSV) - %', format:'percent' },
+              { key:'custoMaoObraDiretaValor', label:'Custo Mão de Obra Direta - R$', format:'currency' },
+              { key:'custoMaoObraDiretaPercent', label:'Custo Mão de Obra Direta - %', format:'percent' },
+              { key:'custosVariaveisValor', label:'Custos Variáveis - R$', format:'currency' },
+              { key:'custosVariaveisPercent', label:'Custos Variáveis - %', format:'percent' },
+              { key:'despesasVariaveisValor', label:'Despesas Variáveis - R$', format:'currency' },
+              { key:'despesasVariaveisPercent', label:'Despesas Variáveis - %', format:'percent' }
+            ],
+            data: () => erpData.pricing.processed
+          }
+        ]
+      },
+      {
+        id:'simulacoes',
+        label:'4. Simulações',
+        description:'Projete volumes, margens e impacto no mix antes de ajustar produção.',
+        sections:[
+          {
+            id:'simulacao-revenda',
+            label:'4.1 Revenda de Produtos',
+            type:'table',
+            columns:[
+              { key:'codigo', label:'Código' },
+              { key:'produto', label:'Produtos / Serviços' },
+              { key:'precoVenda', label:'Preço de Vendas Praticado', format:'currency' },
+              { key:'previsaoVendas', label:'Previsão de Vendas', format:'number' },
+              { key:'faturamentoPrevisto', label:'Faturamento Previsto', format:'currency' },
+              { key:'custosVariaveis', label:'Custos Variáveis', format:'currency' },
+              { key:'impostos', label:'Impostos sobre Vendas', format:'currency' },
+              { key:'taxaMaquina', label:'Taxa da Máquina de Cartão', format:'currency' },
+              { key:'taxaAplicativo', label:'Taxa Aplicativo', format:'currency' },
+              { key:'comissaoVendas', label:'Comissão de Vendas', format:'currency' },
+              { key:'margemContribuicaoValor', label:'Margem de Contribuição (R$)', format:'currency' },
+              { key:'margemContribuicaoPercent', label:'Margem de Contribuição (%)', format:'percent' },
+              { key:'rateioDespesasFixas', label:'Rateio Despesas Fixas', format:'currency' },
+              { key:'margemLucroValor', label:'Margem de Lucro (R$)', format:'currency' },
+              { key:'margemLucroPercent', label:'Margem de Lucro (%)', format:'percent' },
+              { key:'markupMultiplicador', label:'Mark-up Multiplicador', format:'number' },
+              { key:'mixPercent', label:'% do Mix', format:'percent' }
+            ],
+            data: () => erpData.simulations.direct
+          },
+          {
+            id:'simulacao-processados',
+            label:'4.2 Produtos Processados',
+            type:'table',
+            columns:[
+              { key:'codigo', label:'Código' },
+              { key:'produto', label:'Produtos / Serviços' },
+              { key:'precoVenda', label:'Preço de Vendas Praticado', format:'currency' },
+              { key:'previsaoVendas', label:'Previsão de Vendas', format:'number' },
+              { key:'faturamentoPrevisto', label:'Faturamento Previsto', format:'currency' },
+              { key:'custosVariaveis', label:'Custos Variáveis', format:'currency' },
+              { key:'impostos', label:'Impostos sobre Vendas', format:'currency' },
+              { key:'taxaMaquina', label:'Taxa da Máquina de Cartão', format:'currency' },
+              { key:'taxaAplicativo', label:'Taxa Aplicativo', format:'currency' },
+              { key:'comissaoVendas', label:'Comissão de Vendas', format:'currency' },
+              { key:'margemContribuicaoValor', label:'Margem de Contribuição (R$)', format:'currency' },
+              { key:'margemContribuicaoPercent', label:'Margem de Contribuição (%)', format:'percent' },
+              { key:'rateioDespesasFixas', label:'Rateio Despesas Fixas', format:'currency' },
+              { key:'margemLucroValor', label:'Margem de Lucro (R$)', format:'currency' },
+              { key:'margemLucroPercent', label:'Margem de Lucro (%)', format:'percent' },
+              { key:'markupMultiplicador', label:'Mark-up Multiplicador', format:'number' },
+              { key:'mixPercent', label:'% do Mix', format:'percent' }
+            ],
+            data: () => erpData.simulations.processed
+          }
+        ]
+      },
+      {
+        id:'analises',
+        label:'5. Análises',
+        description:'Simule precificação desejada e veja impacto no preço sugerido.',
+        sections:[
+          {
+            id:'analise-revenda',
+            label:'5.1 Revenda de Produtos',
+            type:'table',
+            columns:[
+              { key:'produto', label:'Seleção do Produto' },
+              { key:'precoVenda', label:'Preço de Venda', format:'currency' },
+              { key:'custosVariaveis', label:'Custos Variáveis', format:'currency' },
+              { key:'custoProduto', label:'Custo do Produto', format:'currency' },
+              { key:'frete', label:'Frete', format:'currency' },
+              { key:'despesasVariaveis', label:'Despesas Variáveis', format:'currency' },
+              { key:'impostos', label:'Impostos', format:'currency' },
+              { key:'taxaMaquina', label:'Taxa da Máquina', format:'currency' },
+              { key:'taxaAplicativo', label:'Taxa Aplicativo', format:'currency' },
+              { key:'comissao', label:'Comissão', format:'currency' },
+              { key:'margemContribuicao', label:'Margem de Contribuição', format:'currency' },
+              { key:'rateioDespesasFixas', label:'Rateio de Despesas Fixas', format:'currency' },
+              { key:'margemLucro', label:'Margem de Lucro', format:'currency' },
+              { key:'markup', label:'Mark-up Multiplicador', format:'number' },
+              { key:'lucroDesejadoPercent', label:'Lucro Desejado %', format:'percent' },
+              { key:'precoSugerido', label:'Preço Sugerido', format:'currency' }
+            ],
+            data: () => erpData.analysis.direct
+          },
+          {
+            id:'analise-processados',
+            label:'5.2 Produtos Processados',
+            type:'table',
+            columns:[
+              { key:'produto', label:'Seleção do Produto' },
+              { key:'precoVenda', label:'Preço de Venda', format:'currency' },
+              { key:'custosVariaveis', label:'Custos Variáveis', format:'currency' },
+              { key:'custoProduto', label:'Custo do Produto', format:'currency' },
+              { key:'frete', label:'Frete', format:'currency' },
+              { key:'despesasVariaveis', label:'Despesas Variáveis', format:'currency' },
+              { key:'impostos', label:'Impostos', format:'currency' },
+              { key:'taxaMaquina', label:'Taxa da Máquina', format:'currency' },
+              { key:'taxaAplicativo', label:'Taxa Aplicativo', format:'currency' },
+              { key:'comissao', label:'Comissão', format:'currency' },
+              { key:'margemContribuicao', label:'Margem de Contribuição', format:'currency' },
+              { key:'rateioDespesasFixas', label:'Rateio de Despesas Fixas', format:'currency' },
+              { key:'margemLucro', label:'Margem de Lucro', format:'currency' },
+              { key:'markup', label:'Mark-up Multiplicador', format:'number' },
+              { key:'lucroDesejadoPercent', label:'Lucro Desejado %', format:'percent' },
+              { key:'precoSugerido', label:'Preço Sugerido', format:'currency' }
+            ],
+            data: () => erpData.analysis.processed
+          }
+        ]
+      },
+      {
+        id:'despesas-fixas',
+        label:'6. Despesas Fixas',
+        description:'Registre o CAPEX/ OPEX recorrente para saber seu ponto de equilíbrio.',
+        sections:[
+          { id:'despesas-fixas-total', label:'6.1 Total de Despesas', type:'fixed-expenses', data: () => erpData.fixedExpenses }
+        ]
+      },
+      {
+        id:'folha-pagamento',
+        label:'7. Folha de Pagamento',
+        description:'Detalhe encargos, benefícios e custo hora da equipe.',
+        sections:[
+          { id:'folha-detalhada', label:'7.1 Encargos e Equipe', type:'payroll', data: () => erpData.payroll }
+        ]
+      },
+      {
+        id:'dre',
+        label:'8. DRE',
+        description:'Demonstrativo gerencial para tomada de decisão mensal.',
+        sections:[
+          {
+            id:'dre-gerencial',
+            label:'8.1 Resultado Operacional',
+            type:'multi-table',
+            tables: () => [
+              { title:'Receitas', columns:[ { key:'categoria', label:'Categoria' }, { key:'valor', label:'Valor', format:'currency' } ], data: erpData.dre.receitas },
+              { title:'Custos', columns:[ { key:'categoria', label:'Categoria' }, { key:'valor', label:'Valor', format:'currency' } ], data: erpData.dre.custos },
+              { title:'Mão de Obra', columns:[ { key:'categoria', label:'Categoria' }, { key:'valor', label:'Valor', format:'currency' } ], data: erpData.dre.maoObra },
+              { title:'Estrutura', columns:[ { key:'categoria', label:'Categoria' }, { key:'valor', label:'Valor', format:'currency' } ], data: erpData.dre.estrutura },
+              { title:'Apoio e Administração', columns:[ { key:'categoria', label:'Categoria' }, { key:'valor', label:'Valor', format:'currency' } ], data: erpData.dre.apoioAdm }
+            ],
+            footer: () => ({ label:'Resultado da Operação', valor: erpData.dre.resultadoOperacao })
+          }
+        ]
+      },
+      {
+        id:'dre-entradas',
+        label:'9. Entradas de DRE',
+        description:'Controle diário de lançamentos que alimentam o DRE.',
+        sections:[
+          { id:'dre-lancamentos', label:'9.1 Lançamentos', type:'dre-entries', data: () => erpData.dreEntries }
+        ]
+      },
+      {
+        id:'dashboard',
+        label:'10. Dashboard',
+        description:'Indicadores de performance com foco em margem e capacidade.',
+        sections:[
+          { id:'dashboard-geral', label:'Visão Geral', type:'metrics', data: () => erpData.dashboard }
+        ]
+      },
+      {
+        id:'entrada-dados',
+        label:'11. Entrada de Dados',
+        description:'Centralize lançamentos de vendas e despesas para atualizar o ERP.',
+        sections:[
+          { id:'entrada-operacional', label:'Captura Operacional', type:'data-entry', data: () => erpData.dataEntry }
+        ]
+      }
+    ];
+
     /************* ESTADO *************/
     const LS = { user:'mentorchef.user', chat:'mentorchef.chat', decisions:'mentorchef.decisions', state:'mentorchef.state' };
     let currentUser = JSON.parse(localStorage.getItem(LS.user) || 'null');
-    let appState = JSON.parse(localStorage.getItem(LS.state) || '{"projectActive":"SPAC","locale":"pt-BR"}');
+    let appState = JSON.parse(localStorage.getItem(LS.state) || '{"projectActive":"SPAC","locale":"pt-BR","erp":{"module":"cadastro-produtos","section":"venda-direta"}}');
+    if(!appState.erp){ appState.erp = { module:'cadastro-produtos', section:'venda-direta' }; }
     let chat = JSON.parse(localStorage.getItem(LS.chat) || '[]');
     let decisions = JSON.parse(localStorage.getItem(LS.decisions) || '[]');
     function saveAll(){ localStorage.setItem(LS.user, JSON.stringify(currentUser)); localStorage.setItem(LS.state, JSON.stringify(appState)); localStorage.setItem(LS.chat, JSON.stringify(chat)); localStorage.setItem(LS.decisions, JSON.stringify(decisions)); }
+
+    /************* ERP HELPERS *************/
+    function formatCurrency(value){
+      if(typeof value !== 'number' || Number.isNaN(value)) return value ?? '';
+      return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(value);
+    }
+    function formatNumber(value, options={}){
+      if(typeof value !== 'number' || Number.isNaN(value)) return value ?? '';
+      const { minimumFractionDigits = 0, maximumFractionDigits = 2 } = options;
+      return new Intl.NumberFormat('pt-BR', { minimumFractionDigits, maximumFractionDigits }).format(value);
+    }
+    function formatPercent(value){
+      if(typeof value !== 'number' || Number.isNaN(value)) return value ?? '';
+      const normalized = value <= 1 ? value * 100 : value;
+      return `${normalized.toFixed(1).replace('.',',')}%`;
+    }
+    function buildErpTable(columns, rows, emptyMessage){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/40';
+      const table = document.createElement('table');
+      table.className = 'min-w-full text-xs sm:text-sm';
+      const thead = document.createElement('thead');
+      thead.innerHTML = `<tr>${columns.map(col=>`<th class="${col.headerClassName||'text-left font-semibold px-3 py-2 border-b border-slate-800'}">${col.label}</th>`).join('')}</tr>`;
+      const tbody = document.createElement('tbody');
+      if(!rows || rows.length===0){
+        const tr=document.createElement('tr');
+        const td=document.createElement('td');
+        td.colSpan = columns.length;
+        td.className='px-3 py-4 text-center text-xs opacity-60';
+        td.textContent = emptyMessage || 'Nenhum registro';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      } else {
+        rows.forEach(row=>{
+          const tr=document.createElement('tr');
+          tr.className='border-b border-slate-800/60 last:border-b-0';
+          columns.forEach(col=>{
+            const td=document.createElement('td');
+            td.className = col.className || 'px-3 py-2 align-top whitespace-normal';
+            if(col.render){
+              td.innerHTML = col.render(row);
+            } else {
+              let value = row[col.key];
+              if(col.format === 'currency') value = formatCurrency(value);
+              else if(col.format === 'percent') value = formatPercent(value);
+              else if(col.format === 'number') value = formatNumber(value, col.numberOptions || {});
+              else if(typeof col.format === 'function') value = col.format(row[col.key], row);
+              if(value === null || value === undefined) value = '';
+              if(col.allowHtml){ td.innerHTML = value; }
+              else td.textContent = value;
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      }
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      wrapper.appendChild(table);
+      return wrapper;
+    }
+    function renderErpSummary(container, indicatorsOverride){
+      if(!container) return;
+      container.innerHTML = '';
+      const indicators = indicatorsOverride || (erpData.dashboard?.indicators || []);
+      indicators.forEach(ind=>{
+        const card=document.createElement('div');
+        card.className='border border-slate-800 bg-slate-900/50 rounded-xl p-4 flex flex-col gap-1';
+        card.innerHTML = `<div class="text-[11px] uppercase tracking-wide opacity-60">${ind.label}</div>` +
+          `<div class="text-lg font-bold text-sky-200">${ind.value}</div>` +
+          `<div class="text-xs text-sky-400">${ind.trend||''}</div>` +
+          `<p class="text-xs opacity-70">${ind.description||''}</p>`;
+        container.appendChild(card);
+      });
+      if(indicators.length===0){
+        const empty=document.createElement('div');
+        empty.className='border border-dashed border-slate-700 rounded-xl p-4 text-xs opacity-60';
+        empty.textContent='Nenhum indicador disponível.';
+        container.appendChild(empty);
+      }
+    }
+    function renderFichasTecnicas(container, fichas){
+      if(!container) return;
+      container.innerHTML='';
+      if(!fichas || fichas.length===0){
+        const empty=document.createElement('div');
+        empty.className='border border-dashed border-slate-700 rounded-xl p-4 text-xs opacity-70';
+        empty.textContent='Nenhuma ficha técnica cadastrada.';
+        container.appendChild(empty);
+        return;
+      }
+      fichas.forEach(ficha=>{
+        const card=document.createElement('div');
+        card.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 space-y-4';
+        const header=document.createElement('div');
+        header.className='flex flex-wrap justify-between gap-3';
+        header.innerHTML = `<div><div class="font-semibold">${ficha.codProduto} • ${ficha.nome}</div>` +
+          `<div class="text-xs opacity-70">Tipo: ${ficha.tipo}</div></div>` +
+          `<div class="text-xs text-right opacity-70">Qtd. Produzidos: <span class="font-semibold text-sky-300">${formatNumber(ficha.quantidadeProdutosProduzidos)}</span></div>`;
+        card.appendChild(header);
+        const stats=document.createElement('div');
+        stats.className='grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs';
+        stats.innerHTML = [
+          { label:'Matéria prima base', value:ficha.materiaPrima },
+          { label:'Unidade', value:ficha.unidade },
+          { label:'Quantidade por ficha', value:formatNumber(ficha.quantidade, { maximumFractionDigits:2 }) },
+          { label:'Valor individual', value:formatCurrency(ficha.valorIndividualItem) },
+          { label:'Custo com Insumos', value:formatCurrency(ficha.custoInsumos) },
+          { label:'Custos Variáveis Totais', value:formatCurrency(ficha.custosVariaveisTotais) }
+        ].map(box=>`<div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3"><div class="uppercase text-[10px] opacity-60">${box.label}</div><div class="mt-1 font-semibold">${box.value}</div></div>`).join('');
+        card.appendChild(stats);
+        const itensTitle=document.createElement('div');
+        itensTitle.className='text-xs font-semibold';
+        itensTitle.textContent='2.4 Materiais / Ingredientes';
+        card.appendChild(itensTitle);
+        card.appendChild(buildErpTable([
+          { key:'materiaPrima', label:'Matéria Prima', className:'px-3 py-2 align-top whitespace-normal min-w-[160px]' },
+          { key:'unidade', label:'Unid.' },
+          { key:'quantidade', label:'Quant.', format:'number', numberOptions:{ maximumFractionDigits:3 } },
+          { key:'valor', label:'Valor individual do item', format:'currency' }
+        ], ficha.itens, 'Nenhum item cadastrado'));
+        const mpTitle=document.createElement('div');
+        mpTitle.className='text-xs font-semibold mt-2';
+        mpTitle.textContent='2.10 Cadastro de matérias-primas com fator de conversão';
+        card.appendChild(mpTitle);
+        card.appendChild(buildErpTable([
+          { key:'materiaPrima', label:'Matéria Prima', className:'px-3 py-2 align-top whitespace-normal min-w-[160px]' },
+          { key:'unidade', label:'Unidade' },
+          { key:'quantidade', label:'Quantidade', format:'number', numberOptions:{ maximumFractionDigits:2 } },
+          { key:'fatorConversao', label:'Fator de Conversão/Perda', format:'percent' }
+        ], ficha.materiasPrimas, 'Sem registros de matérias-primas'));
+        container.appendChild(card);
+      });
+    }
+    function renderFixedExpenses(container, data){
+      if(!container) return;
+      container.innerHTML='';
+      if(!data){ return; }
+      const totalCard=document.createElement('div');
+      totalCard.className='border border-slate-800 bg-slate-900/50 rounded-xl p-4';
+      totalCard.innerHTML = `<div class="text-xs uppercase tracking-wide opacity-60">Total de Despesas Fixas</div>` +
+        `<div class="text-2xl font-bold text-sky-300 mt-1">${formatCurrency(data.total)}</div>` +
+        `<p class="text-xs opacity-70 mt-2">Inclui cooperados e demais despesas recorrentes cadastradas.</p>`;
+      container.appendChild(totalCard);
+      container.appendChild(buildErpTable([
+        { key:'categoria', label:'Categoria', className:'px-3 py-2 align-top whitespace-normal min-w-[200px]' },
+        { key:'valor', label:'Valor Mensal', format:'currency' }
+      ], data.items));
+    }
+    function renderPayroll(container, data){
+      if(!container) return;
+      container.innerHTML='';
+      if(!data) return;
+      const grid=document.createElement('div');
+      grid.className='grid grid-cols-1 md:grid-cols-2 gap-4';
+      const trabalhista=document.createElement('div');
+      trabalhista.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4';
+      trabalhista.innerHTML='<div class="font-semibold mb-2">7.1 Encargos Trabalhistas</div>';
+      trabalhista.appendChild(buildErpTable([
+        { key:'item', label:'Item', className:'px-3 py-2 align-top whitespace-normal min-w-[200px]' },
+        { key:'percentual', label:'%', format:'percent' }
+      ], data.encargosTrabalhistas));
+      grid.appendChild(trabalhista);
+      const sociais=document.createElement('div');
+      sociais.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4';
+      sociais.innerHTML='<div class="font-semibold mb-2">7.2 Encargos Sociais</div>';
+      sociais.appendChild(buildErpTable([
+        { key:'item', label:'Item', className:'px-3 py-2 align-top whitespace-normal min-w-[200px]' },
+        { key:'percentual', label:'%', format:'percent' }
+      ], data.encargosSociais));
+      grid.appendChild(sociais);
+      container.appendChild(grid);
+      const colaboradores=document.createElement('div');
+      colaboradores.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 mt-4';
+      colaboradores.innerHTML='<div class="font-semibold mb-3">7.3 Colaboradores</div>';
+      colaboradores.appendChild(buildErpTable([
+        { key:'codigo', label:'Código' },
+        { key:'nome', label:'Nome do Funcionário', className:'px-3 py-2 align-top whitespace-normal min-w-[160px]' },
+        { key:'salario', label:'Salário', format:'currency' },
+        { key:'setor', label:'Setor' },
+        { key:'cargo', label:'Cargo', className:'px-3 py-2 align-top whitespace-normal min-w-[140px]' },
+        { key:'contratacao', label:'Contratação' },
+        { key:'encargosSociais', label:'Encargos Sociais', format:'percent' },
+        { key:'encargosTrabalhistas', label:'Encargos Trabalhistas', format:'percent' },
+        { key:'valeTransporte', label:'Vale Transporte', format:'currency' },
+        { key:'valeRefeicao', label:'Vale Refeição', format:'currency' },
+        { key:'convenioMedico', label:'Convênio Médico', format:'currency' },
+        { key:'total', label:'Total', format:'currency' },
+        { key:'cargaHorariaMensal', label:'Carga Horária Mensal', format:'number' },
+        { key:'valorHora', label:'Valor/hora', format:'currency' }
+      ], data.colaboradores));
+      container.appendChild(colaboradores);
+    }
+    function renderMultiTable(container, tables, footer){
+      if(!container) return;
+      container.innerHTML='';
+      const entries = typeof tables === 'function' ? tables() : tables;
+      (entries||[]).forEach(tbl=>{
+        const wrap=document.createElement('div');
+        wrap.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 space-y-3';
+        wrap.innerHTML=`<div class="font-semibold">${tbl.title}</div>`;
+        const data = typeof tbl.data === 'function' ? tbl.data() : tbl.data;
+        wrap.appendChild(buildErpTable(tbl.columns, data||[]));
+        container.appendChild(wrap);
+      });
+      const footerData = typeof footer === 'function' ? footer() : footer;
+      if(footerData){
+        const footerCard=document.createElement('div');
+        footerCard.className='border border-sky-700/60 bg-sky-900/20 rounded-xl p-4';
+        footerCard.innerHTML=`<div class="text-xs uppercase tracking-wide text-sky-300">${footerData.label}</div>` +
+          `<div class="text-xl font-bold text-sky-200 mt-1">${formatCurrency(footerData.valor)}</div>`;
+        container.appendChild(footerCard);
+      }
+    }
+    function renderDreEntries(container, data){
+      if(!container) return;
+      container.innerHTML='';
+      if(!data) return;
+      const receitasCard=document.createElement('div');
+      receitasCard.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4';
+      receitasCard.innerHTML='<div class="font-semibold mb-3">9.1 Lançamento de Receitas</div>';
+      receitasCard.appendChild(buildErpTable([
+        { key:'tipo', label:'Tipo de Receita', className:'px-3 py-2 align-top whitespace-normal min-w-[200px]' },
+        { key:'valor', label:'Valor', format:'currency' }
+      ], data.receitas));
+      container.appendChild(receitasCard);
+      (data.despesas||[]).forEach(grupo=>{
+        const card=document.createElement('div');
+        card.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 mt-4';
+        card.innerHTML=`<div class="font-semibold mb-2">9.2 ${grupo.grupo}</div>`;
+        card.appendChild(buildErpTable([
+          { key:'categoria', label:'Categoria', className:'px-3 py-2 align-top whitespace-normal min-w-[220px]' },
+          { key:'valor', label:'Valor', format:'currency' }
+        ], grupo.itens));
+        container.appendChild(card);
+      });
+      if(data.relatorio){
+        const relatorioCard=document.createElement('div');
+        relatorioCard.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 mt-4';
+        relatorioCard.innerHTML = `<div class="font-semibold mb-2">9.3 DRE - Resumo Gerencial (${data.relatorio.periodo})</div>` +
+          `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">` +
+          [
+            { label:'Receita Líquida', value:formatCurrency(data.relatorio.receitaLiquida) },
+            { label:'Lucro Operacional', value:formatCurrency(data.relatorio.lucroOperacional) },
+            { label:'Margem Operacional', value:formatPercent(data.relatorio.margemOperacional) },
+            { label:'Insights', value:data.relatorio.comentario }
+          ].map(box=>`<div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3"><div class="uppercase text-[10px] opacity-60">${box.label}</div><div class="mt-1 font-semibold">${box.value}</div></div>`).join('') +
+          `</div>`;
+        container.appendChild(relatorioCard);
+      }
+    }
+    function renderMetrics(container, data){
+      if(!container) return;
+      container.innerHTML='';
+      const summaryGrid=document.createElement('div');
+      summaryGrid.className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3';
+      container.appendChild(summaryGrid);
+      renderErpSummary(summaryGrid, data?.indicators);
+      if(data?.mix){
+        const mixCard=document.createElement('div');
+        mixCard.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 mt-4';
+        mixCard.innerHTML='<div class="font-semibold mb-2">Distribuição do Mix</div>';
+        mixCard.appendChild(buildErpTable([
+          { key:'categoria', label:'Categoria', className:'px-3 py-2 align-top whitespace-normal min-w-[200px]' },
+          { key:'faturamento', label:'Faturamento Previsto', format:'currency' },
+          { key:'mixPercent', label:'% do Mix', format:'percent' },
+          { key:'margemContribuicao', label:'Margem de Contribuição', format:'percent' }
+        ], data.mix));
+        container.appendChild(mixCard);
+      }
+      if(data?.pipeline){
+        const pipeCard=document.createElement('div');
+        pipeCard.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 mt-4';
+        pipeCard.innerHTML='<div class="font-semibold mb-2">Projetos Estratégicos em Andamento</div>';
+        const list=document.createElement('div');
+        list.className='space-y-2 text-xs';
+        data.pipeline.forEach(item=>{
+          const row=document.createElement('div');
+          row.className='bg-slate-900/60 border border-slate-800 rounded-lg p-3';
+          row.innerHTML=`<div class="font-semibold">${item.projeto}</div><div class="opacity-70">Status: ${item.status}</div><div class="text-sky-300">Impacto: ${item.impacto}</div><div class="opacity-60">Deadline: ${item.deadline}</div>`;
+          list.appendChild(row);
+        });
+        pipeCard.appendChild(list);
+        container.appendChild(pipeCard);
+      }
+    }
+    function renderDataEntry(container, data){
+      if(!container) return;
+      container.innerHTML='';
+      if(!data) return;
+      const vendasCard=document.createElement('div');
+      vendasCard.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4';
+      vendasCard.innerHTML='<div class="font-semibold mb-2">10.1 Entrada de Vendas</div>';
+      vendasCard.appendChild(buildErpTable([
+        { key:'data', label:'Data', format:(value)=> value ? new Date(value).toLocaleDateString() : '' },
+        { key:'canal', label:'Canal' },
+        { key:'produto', label:'Produto / Serviço', className:'px-3 py-2 align-top whitespace-normal min-w-[180px]' },
+        { key:'quantidade', label:'Quant.', format:'number' },
+        { key:'precoUnitario', label:'Preço Unitário', format:'currency' },
+        { key:'receita', label:'Receita', format:'currency' }
+      ], data.vendas));
+      container.appendChild(vendasCard);
+      const despesasCard=document.createElement('div');
+      despesasCard.className='border border-slate-800 rounded-xl bg-slate-900/40 p-4 mt-4';
+      despesasCard.innerHTML='<div class="font-semibold mb-2">10.2 Entrada de Despesas</div>';
+      despesasCard.appendChild(buildErpTable([
+        { key:'data', label:'Data', format:(value)=> value ? new Date(value).toLocaleDateString() : '' },
+        { key:'categoria', label:'Categoria' },
+        { key:'descricao', label:'Descrição', className:'px-3 py-2 align-top whitespace-normal min-w-[200px]' },
+        { key:'valor', label:'Valor', format:'currency' },
+        { key:'centroCusto', label:'Centro de Custo' }
+      ], data.despesas));
+      container.appendChild(despesasCard);
+    }
+    function renderErpSection(container, section){
+      if(!container || !section) return;
+      if(section.type==='table'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        container.appendChild(buildErpTable(section.columns, data || [], section.emptyMessage));
+        return;
+      }
+      if(section.type==='fichas'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        renderFichasTecnicas(container, data);
+        return;
+      }
+      if(section.type==='fixed-expenses'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        renderFixedExpenses(container, data);
+        return;
+      }
+      if(section.type==='payroll'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        renderPayroll(container, data);
+        return;
+      }
+      if(section.type==='multi-table'){
+        const tables = typeof section.tables === 'function' ? section.tables : section.tables;
+        const footer = typeof section.footer === 'function' ? section.footer : section.footer;
+        renderMultiTable(container, tables, footer);
+        return;
+      }
+      if(section.type==='dre-entries'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        renderDreEntries(container, data);
+        return;
+      }
+      if(section.type==='metrics'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        renderMetrics(container, data);
+        return;
+      }
+      if(section.type==='data-entry'){
+        const data = typeof section.data === 'function' ? section.data() : section.data;
+        renderDataEntry(container, data);
+        return;
+      }
+      if(typeof section.render === 'function'){ section.render(container); }
+    }
+    function renderErp(){
+      const summaryEl=document.getElementById('erpSummary');
+      if(summaryEl) renderErpSummary(summaryEl);
+      const nav=document.getElementById('erpNav');
+      const content=document.getElementById('erpContent');
+      const sectionNav=document.getElementById('erpSectionNav');
+      const timestamp=document.getElementById('erpTimestamp');
+      if(timestamp) timestamp.textContent = `Atualizado ${new Date().toLocaleString()}`;
+      if(!nav || !content || !sectionNav) return;
+      const activeModule = erpModules.find(m=>m.id===appState.erp.module) || erpModules[0];
+      if(!activeModule) return;
+      nav.innerHTML='';
+      erpModules.forEach(mod=>{
+        const active = mod.id===activeModule.id;
+        const btn=document.createElement('button');
+        btn.className=`w-full text-left px-4 py-3 rounded-xl border transition ${active?'border-sky-500 bg-sky-900/40 text-sky-100':'border-slate-800 bg-slate-900/40 hover:border-slate-700'}`;
+        btn.innerHTML=`<div class="text-sm font-semibold">${mod.label}</div>` + (mod.description?`<div class="text-[11px] opacity-60 mt-1">${mod.description}</div>`:'');
+        btn.onclick=()=>{
+          appState.erp.module = mod.id;
+          const firstSection = mod.sections && mod.sections.length ? mod.sections[0] : null;
+          appState.erp.section = firstSection ? firstSection.id : null;
+          saveAll();
+          renderErp();
+        };
+        nav.appendChild(btn);
+      });
+      sectionNav.innerHTML='';
+      const sections = activeModule.sections || [];
+      let activeSection = sections.find(sec=>sec.id===appState.erp.section) || sections[0] || null;
+      if(activeSection){
+        appState.erp.section = activeSection.id;
+        sections.forEach(sec=>{
+          const pill=document.createElement('button');
+          const isActive = sec.id===activeSection.id;
+          pill.className=`pill text-xs ${isActive?'bg-sky-900/40 border-sky-500 text-sky-100':'bg-slate-900/40 border-slate-700 text-slate-200'}`;
+          pill.textContent=sec.label;
+          pill.onclick=()=>{
+            appState.erp.section = sec.id;
+            saveAll();
+            renderErp();
+          };
+          sectionNav.appendChild(pill);
+        });
+      }
+      content.innerHTML='';
+      if(activeModule.description){
+        const desc=document.createElement('p');
+        desc.className='text-xs opacity-70';
+        desc.textContent=activeModule.description;
+        content.appendChild(desc);
+      }
+      if(activeSection && activeSection.description){
+        const desc=document.createElement('p');
+        desc.className='text-xs opacity-70 mt-2';
+        desc.textContent=activeSection.description;
+        content.appendChild(desc);
+      }
+      if(activeSection){
+        const sectionContainer=document.createElement('div');
+        sectionContainer.className='space-y-4 mt-4';
+        content.appendChild(sectionContainer);
+        renderErpSection(sectionContainer, activeSection);
+      } else if(typeof activeModule.render === 'function'){
+        activeModule.render(content);
+      }
+    }
 
     function t(key){ const dict = i18n[appState.locale] || i18n['pt-BR']; return dict[key] || key; }
     function applyI18n(){
@@ -334,11 +1382,12 @@
 
     /************* DASHBOARD *************/
     function setView(v){
-      ['pane-chat','pane-decisions','pane-projects','pane-timeline'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+      ['pane-chat','pane-decisions','pane-projects','pane-timeline','pane-erp'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('hidden'); });
       document.getElementById(`pane-${v}`).classList.remove('hidden');
       if(v==='decisions'){ renderGraph(); renderDecisionsTable(); }
       if(v==='timeline'){ renderTimeline(); }
       if(v==='chat'){ renderChat(); }
+      if(v==='erp'){ renderErp(); }
     }
     function renderAllDashboard(){
       document.getElementById('userChip').textContent = currentUser ? currentUser.name : 'Visitante';
@@ -354,7 +1403,7 @@
         ];
         saveAll();
       }
-      setView('chat'); renderGraph(); renderDecisionsTable(); renderChat(); renderTimeline();
+      setView('chat'); renderGraph(); renderDecisionsTable(); renderChat(); renderTimeline(); renderErp();
     }
 
     /************* CHAT *************/
